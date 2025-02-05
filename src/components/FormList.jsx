@@ -1,4 +1,6 @@
+import React from "react";
 import { useState } from "react";
+import axios from "axios";
 
 const initialShoppingListData = [
   {
@@ -124,11 +126,13 @@ function FormList() {
           <label for="category">Scegli una categoria</label>
 
           <select
+            required
             name="category"
             id="category"
             value={formData.category}
             onChange={(e) => handleFormField(e.target.value, "category")}
           >
+            <option value="-">-</option>
             <option value="FrontEnd">FrontEnd</option>
             <option value="BackEnd">BackEnd</option>
             <option value="UI/UX">UI/UX</option>
