@@ -1,126 +1,180 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
-const article = {
-  title: "",
-  author: "",
-  content: "",
-  category: "",
-  avaible: true,
-};
+// const article = {
+//   title: "",
+//   author: "",
+//   content: "",
+//   category: "",
+//   avaible: true,
+// };
 
 function FormList() {
-  const [list, setList] = useState([]);
-  const [formDataArticle, setformDataArticle] = useState(article);
+  const [blogsList, setBlogsList] = useState([]);
 
-  const hanldeFormList = (fieldName, value) => {
-    setformDataArticle((curentState) => ({
-      ...curentState,
-      [fieldName]: value,
-    }));
-  };
+  const [productFormData, setProductFormData] = useState({
+    title: "",
+    content: "",
+    image: "",
+    tags: "",
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    setList((currentList) => [...currentList, formDataArticle]);
-    setformDataArticle({
-      title: "",
-      author: "",
-      content: "",
-      category: "",
-      avaible: false,
+  const addProducts = () => {
+    axios.get("http://localhost:3001/post").then(function (res) {
+      const blogs = res.data;
+      setBlogsList(blogs);
     });
   };
-
-  const handleArticleList = (productDeleteArticle) => {
-    setList((currentState) =>
-      currentState.filter((product) => product !== productDeleteArticle)
-    );
+  const handleDeleteList = (id) => {
+    axios
+      .delete(`http://localhost:3001/post/${id}`)
+      .then(function () {
+        setBlogsList((currentList) =>
+          currentList.filter((post) => post.id !== id)
+        );
+      })
+      .catch((error) => {
+        console.error("Error delete:", error);
+      });
   };
 
-  const handleDeleteList = () => {
-    setList([]);
+  const handleSumbit = (e) => {
+    e.preventDefault();
+    const tagsArray = productFormData.tags
+      ? productFormData.tags.split(",").map((tag) => tag.trim())
+      : [];
+    const newProduct = {
+      ...productFormData,
+
+      tags: tagsArray,
+    };
+    axios.post("http://localhost:3001/posts", newProduct).then((res) => {
+      setBlogsList([...blogsList, res.data]);
+      setProductFormData({ title: "", content: "", tags: "", image: "" });
+    });
+    console.log(productFormData);
   };
+
+  useEffect(addProducts, []);
+
+  // const [list, setList] = useState([]);
+  // const [formDataArticle, setformDataArticle] = useState(article);
+
+  // const hanldeFormList = (fieldName, value) => {
+  //   setformDataArticle((curentState) => ({
+  //     ...curentState,
+  //     [fieldName]: value,
+  //   }));
+  // };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   setList((currentList) => [...currentList, formDataArticle]);
+  //   setformDataArticle({
+  //     title: "",
+  //     author: "",
+  //     content: "",
+  //     category: "",
+  //     avaible: false,
+  //   });
+  // };
+
+  // const handleArticleList = (productDeleteArticle) => {
+  //   setList((currentState) =>
+  //     currentState.filter((product) => product !== productDeleteArticle)
+  //   );
+  // };
+
+  // const handleDeleteList = () => {
+  //   setList([]);
+  // };
 
   return (
     <div className="container">
-      <h1>Lista Articoli</h1>
-      <ul>
-        {list.map((product, index) => (
-          <li key={product.title}>
-            {index} <br />
-            <strong>Titolo: </strong>
-            {product.title} <br />
-            <strong>Autore: </strong>
-            {product.author} <br />
-            <strong>Contenuto: </strong>
-            {product.content} <br />
-            <strong>Categoria: </strong>
-            {product.category} <br />
-            <strong>Stato: </strong>
-            {product.avaible ? "pubblicato" : "non pubblicato"} <br />
-            <button onClick={() => handleArticleList(product)}>🗑️</button>
-          </li>
-        ))}
-      </ul>
-      <button onClick={handleDeleteList}>Cancella lista</button>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            placeholder="inserisci il titolo"
-            value={formDataArticle.title}
-            onChange={(e) => hanldeFormList("title", e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="inserisci l'autore"
-            value={formDataArticle.author}
-            onChange={(e) => hanldeFormList("author", e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          {" "}
-          <input
-            type="text"
-            placeholder="inserisci il contenuto"
-            value={formDataArticle.content}
-            onChange={(e) => hanldeFormList("content", e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          {" "}
-          <label>Scegli una categoria</label>
-          <select
-            name="category"
-            value={formDataArticle.category}
-            onChange={(e) => hanldeFormList("category", e.target.value)}
-            required
-          >
-            <option value="-">-</option>
-            <option value="FrontEnd">FrontEnd</option>
-            <option value="BackEnd">BackEnd</option>
-            <option value="UI/UX">UI/UX</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="">Pubblica</label>
-          <input
-            type="checkbox"
-            checked={formDataArticle.avaible}
-            onChange={(e) => hanldeFormList("avaible", e.target.checked)}
-          />
-        </div>
+      <h1>Lista blogs</h1>
+      <div className="button"></div>
+      <div className="row">
+        {blogsList.map((elm) => {
+          return (
+            <div className="col" key={elm.id}>
+              <div className="card">
+                <button
+                  className="btn"
+                  onClick={() => handleDeleteList(elm.id)}
+                >
+                  x
+                </button>
+                <h3 className="title">{elm.title}</h3>
+                <div className="detaills">
+                  <div className="text col-details">
+                    <ul>
+                      {elm.tags.map((tag, index) => {
+                        return <li key={index}>{tag}</li>;
+                      })}
+                    </ul>
+                  </div>
+                  <div className="image col-details">
+                    <img src={elm.image} alt={elm.title} />
+                  </div>
+                </div>
+                <p>{elm.content}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-        <button type="submit">Invia</button>
-      </form>
+      <div className="form-data">
+        <hr />
+        <h1>Aggiungi prodotto</h1>
+        <form onSubmit={handleSumbit}>
+          <input
+            type="text"
+            value={productFormData.title}
+            placeholder="inserisci il nome"
+            onChange={(e) =>
+              setProductFormData({
+                ...productFormData,
+                title: e.target.value,
+              })
+            }
+          />
+          <input
+            type="text"
+            value={productFormData.content}
+            placeholder="inserisci il content"
+            onChange={(e) =>
+              setProductFormData({
+                ...productFormData,
+                content: e.target.value,
+              })
+            }
+          />
+          <input
+            type="text"
+            value={productFormData.tags}
+            placeholder="inserisci dei tag"
+            onChange={(e) =>
+              setProductFormData({ ...productFormData, tags: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            value={productFormData.image}
+            placeholder="inserisci l'url"
+            alt=""
+            onChange={(e) =>
+              setProductFormData({
+                ...productFormData,
+                image: e.target.value,
+              })
+            }
+          />
+          <button type="submit">Invia</button>
+        </form>
+      </div>
     </div>
   );
 }
