@@ -2,77 +2,55 @@ import React from "react";
 import { useState } from "react";
 import axios from "axios";
 
-const initialShoppingListData = [
-  {
-    id: 1,
-    title: "Il computer",
-    author: "Matteo",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam harum, unde a repudiandae cumque ipsum libero blanditiis voluptates fugit adipisci nesciunt debitis accusantium consequuntur? Quasi molestias porro impedit placeat quae!",
-    category: "FrontEnd",
-  },
-  {
-    id: 2,
-    title: "HTML",
-    author: "Paolo",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam harum, unde a repudiandae cumque ipsum libero blanditiis voluptates fugit adipisci nesciunt debitis accusantium consequuntur? Quasi molestias porro impedit placeat quae!",
-    category: "BackEnd",
-  },
-  {
-    id: 3,
-    title: "La cucina italiana",
-    author: "Gianni",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam harum, unde a repudiandae cumque ipsum libero blanditiis voluptates fugit adipisci nesciunt debitis accusantium consequuntur? Quasi molestias porro impedit placeat quae!",
-    category: "UI/UX",
-  },
-];
-
-const initialFormData = {
+const article = {
   title: "",
   author: "",
   content: "",
   category: "",
+  avaible: true,
 };
 
 function FormList() {
-  const [shoppingList, setShoppingList] = useState(initialShoppingListData);
-  const [formData, setFormData] = useState(initialFormData);
-  const handleFormField = (value, fieldName) => {
-    setFormData((currentState) => ({ ...currentState, [fieldName]: value }));
+  const [list, setList] = useState([]);
+  const [formDataArticle, setformDataArticle] = useState(article);
+
+  const hanldeFormList = (fieldName, value) => {
+    setformDataArticle((curentState) => ({
+      ...curentState,
+      [fieldName]: value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const newProduct = {
-      id: shoppingList[shoppingList.length - 1].id + 1,
-      title: formData.title,
-      author: formData.author,
-      content: formData.content,
-      category: formData.category,
-    };
-    setShoppingList((currentState) => [...currentState, newProduct]);
-    // Reset dei campi
-    setFormData(initialFormData);
+    setList((currentList) => [...currentList, formDataArticle]);
+    setformDataArticle({
+      title: "",
+      author: "",
+      content: "",
+      category: "",
+      avaible: false,
+    });
   };
 
-  const emptyList = () => {
-    setShoppingList([]);
-  };
-
-  const handleDelete = (productId) => {
-    setShoppingList((currentState) =>
-      currentState.filter((product) => product.id !== productId)
+  const handleArticleList = (productDeleteArticle) => {
+    setList((currentState) =>
+      currentState.filter((product) => product !== productDeleteArticle)
     );
   };
 
+  const handleDeleteList = () => {
+    setList([]);
+  };
+
   return (
-    <div>
+    <div className="container">
+      <h1>Lista Articoli</h1>
       <ul>
-        {shoppingList.map((product) => (
-          <li key={product.id}>
+        {list.map((product, index) => (
+          <li key={product.title}>
+            {index} <br />
             <strong>Titolo: </strong>
             {product.title} <br />
             <strong>Autore: </strong>
@@ -81,56 +59,50 @@ function FormList() {
             {product.content} <br />
             <strong>Categoria: </strong>
             {product.category} <br />
-            <button
-              style={{ marginLeft: "10px" }}
-              onClick={() => handleDelete(product.id)}
-            >
-              🗑️
-            </button>
+            <strong>Stato: </strong>
+            {product.avaible ? "pubblicato" : "non pubblicato"} <br />
+            <button onClick={() => handleArticleList(product)}>🗑️</button>
           </li>
         ))}
       </ul>
-      <button onClick={emptyList}>Cancella lista</button>
-      <hr />
-      <h3>Aggiungi Articolo</h3>
+      <button onClick={handleDeleteList}>Cancella lista</button>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="title">Titolo articolo</label>
           <input
-            id="title"
             type="text"
-            value={formData.title}
-            onChange={(e) => handleFormField(e.target.value, "title")}
-          />
-        </div>
-        <div>
-          <label htmlFor="author">Autore articolo</label>
-          <input
-            id="author"
-            type="text"
-            value={formData.author}
-            onChange={(e) => handleFormField(e.target.value, "author")}
-          />
-        </div>
-        <div>
-          <label htmlFor="content">contenuto articolo</label>
-          <input
-            id="content"
-            type="text"
-            value={formData.content}
-            onChange={(e) => handleFormField(e.target.value, "content")}
-          />
-        </div>
-
-        <div>
-          <label for="category">Scegli una categoria</label>
-
-          <select
+            placeholder="inserisci il titolo"
+            value={formDataArticle.title}
+            onChange={(e) => hanldeFormList("title", e.target.value)}
             required
+          />
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="inserisci l'autore"
+            value={formDataArticle.author}
+            onChange={(e) => hanldeFormList("author", e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          {" "}
+          <input
+            type="text"
+            placeholder="inserisci il contenuto"
+            value={formDataArticle.content}
+            onChange={(e) => hanldeFormList("content", e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          {" "}
+          <label>Scegli una categoria</label>
+          <select
             name="category"
-            id="category"
-            value={formData.category}
-            onChange={(e) => handleFormField(e.target.value, "category")}
+            value={formDataArticle.category}
+            onChange={(e) => hanldeFormList("category", e.target.value)}
+            required
           >
             <option value="-">-</option>
             <option value="FrontEnd">FrontEnd</option>
@@ -139,8 +111,15 @@ function FormList() {
           </select>
         </div>
         <div>
-          <button type="submit">Invia</button>
+          <label htmlFor="">Pubblica</label>
+          <input
+            type="checkbox"
+            checked={formDataArticle.avaible}
+            onChange={(e) => hanldeFormList("avaible", e.target.checked)}
+          />
         </div>
+
+        <button type="submit">Invia</button>
       </form>
     </div>
   );
