@@ -82,7 +82,9 @@ body {
 
 .person-info {
   padding-top: 0.9375rem;
+  max-width: 6.25rem;
   text-align: left;
+  overflow-wrap: break-word;
 }
 
 .delete-btn button {
