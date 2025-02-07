@@ -1,8 +1,38 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const initialFormData = {
+  name: "",
+  image: "",
+  status: "",
+  species: "",
+  gender: "",
+};
+
 export default function () {
   const [characters, setCharacters] = useState([]);
+  const [formData, setFormData] = useState(initialFormData);
+
+  const handleFormField = (value, fieldName) => {
+    setFormData((currentState) => ({
+      ...currentState,
+      [fieldName]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newCharacter = {
+      id: characters[characters.length - 1].id + 1,
+      name: formData.name,
+      image: formData.image,
+      status: formData.status,
+      species: formData.species,
+      gender: formData.gender,
+    };
+    setCharacters((currentState) => [...currentState, newCharacter]);
+    setFormData(initialFormData);
+  };
 
   const handleDelete = (characterId) => {
     setCharacters((currentState) =>
@@ -60,6 +90,95 @@ export default function () {
               </>
             );
           })}
+        </div>
+        <div className="form">
+          <h3>Aggiungi un personaggio</h3>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="name">Inserisci il nome del personaggio</label>{" "}
+              <br />
+              <input
+                type="text"
+                value={formData.name}
+                required
+                onChange={(e) => {
+                  handleFormField(e.target.value, "name");
+                }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="status">Inserisci lo stato del personaggio</label>{" "}
+              <br />
+              <select
+                name="status"
+                id="status"
+                value={formData.status}
+                required
+                onChange={(e) => {
+                  handleFormField(e.target.value, "status");
+                }}
+              >
+                <option value="-">-</option>
+                <option value="Alive">Alive</option>
+                <option value="Dead">Dead</option>
+                <option value="Unknown">Unknown</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="status">Inserisci la specie personaggio</label>{" "}
+              <br />
+              <select
+                name="species"
+                id="species"
+                value={formData.species}
+                required
+                onChange={(e) => {
+                  handleFormField(e.target.value, "species");
+                }}
+              >
+                <option value="-">-</option>
+                <option value="Human">Human</option>
+                <option value="Alien">Alien</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="status">
+                Inserisci il genere del personaggio
+              </label>{" "}
+              <br />
+              <select
+                name="gender"
+                id="gender"
+                value={formData.gender}
+                required
+                onChange={(e) => {
+                  handleFormField(e.target.value, "gender");
+                }}
+              >
+                <option value="-">-</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Unknown">Unknown</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="img">Inserisci url immagine</label> <br />
+              <input
+                id="img-form"
+                type="text"
+                required
+                value={formData.image}
+                onChange={(e) => handleFormField(e.target.value, "image")}
+              />
+            </div>
+            <button className="btn-add" type="submit">
+              Invia
+            </button>
+          </form>
         </div>
       </div>
     </>
